@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <style>
+      #log {
+        font-size: small;
+      }
+      video {
+        max-width: 100%;
+      }
+    </style>
+    <script type="text/javascript" src="resources.js"></script>
+    <script type="text/javascript" src="eme.js"></script>
+    <script type="text/javascript" src="mse.js"></script>
+  </head>
+  <body>
+    <input id="loadVideo" type="checkbox" name="loadVideo" value="1">Load video<br></input>
+    <input id="loadAudio" type="checkbox" name="loadAudio" value="1">Load audio<br></input>
+    <button onclick="Load();">Load</button><br>
+    <video id="v" controls preload="auto">
+    </video>
+    <div id="log">
+    </div>
+    <script>
+    
+      function Load() {
+        var video = e("v");
+
+        // Log events dispatched to make debugging easier...
+        [ "canplay", "canplaythrough", "encrypted", "ended", "error", "loadeddata",
+          "loadedmetadata", "loadstart", "pause", "play", "playing", "progress",
+          "stalled", "suspend", "waiting",
+        ].forEach(function (e) {
+          v.addEventListener(e, function(event) {
+            log("EVENT: " + e);
+          }, false);
+        });
+
+        var ms = new MediaSource();
+        video.src = URL.createObjectURL(ms);
+
+        var SourceOpen = function () {
+          ms.removeEventListener("sourceopen", SourceOpen);
+          log(name + " sourceopen");
+          var p = [];
+          if (e("loadVideo").checked) {
+            p.push(MSELoadTrack(videoFragments, "video/mp4", ms, "video"));
+          }
+          if (e("loadAudio").checked) {
+            p.push(MSELoadTrack(audioFragments, "audio/mp4", ms, "audio"));
+          }
+          if (p.length) {
+            Promise.all(p).then(function(){log("All segments downloaded"); ms.endOfStream();});
+          }
+        }
+        
+        ms.addEventListener("sourceopen", SourceOpen)
+          
+        var keys = {
+          // "keyid" : "key"
+          "7e571d037e571d037e571d037e571d03" : "7e5733337e5733337e5733337e573333",
+          "7e571d047e571d047e571d047e571d04" : "7e5744447e5744447e5744447e574444",
+        };
+          
+          
+        var options = [
+          {
+            keySystem: "org.w3.clearkey",
+            initDataType: "cenc",
+            videoType: "video/mp4",
+          }
+        ];      
+        
+        SetupEME(video, "video", keys, options);
+      }
+    </script>
+  </body>
+</html>
