@@ -15,9 +15,6 @@
   <body>
     <a href="https://github.com/cpearce/mse-eme"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
 
-    <input id="loadVideo" type="checkbox" name="loadVideo" value="1">Load video<br></input>
-    <input id="loadAudio" type="checkbox" name="loadAudio" value="1">Load audio<br></input>
-    <button onclick="Load();">Load</button><br>
     <video id="v" controls preload="auto">
     </video>
     <div id="log">
@@ -26,7 +23,6 @@
 
       const KEYSYSTEM_TYPE = "org.w3.clearkey";
 
-      function Load() {
         var video = e("v");
 
         // Log events dispatched to make debugging easier...
@@ -60,21 +56,13 @@
         var SourceOpen = function () {
           ms.removeEventListener("sourceopen", SourceOpen);
           log(name + " sourceopen");
-          var p = [];
-          if (e("loadVideo").checked) {
-            p.push(MSELoadTrack(videoFragments, "video/mp4", ms, "video"));
-          }
-          if (e("loadAudio").checked) {
-            p.push(MSELoadTrack(audioFragments, "audio/mp4", ms, "audio"));
-          }
-          if (p.length) {
-            Promise.all(p).then(function(){log("All segments downloaded"); ms.endOfStream();});
-          }
+          Promise.all([MSELoadTrack(videoFragments, "video/mp4", ms, "video"),
+                       MSELoadTrack(audioFragments, "audio/mp4", ms, "audio")])
+            .then(function(){log("All segments downloaded"); ms.endOfStream();});
         }
 
-        ms.addEventListener("sourceopen", SourceOpen)
+        ms.addEventListener("sourceopen", SourceOpen);
 
-      }
     </script>
   </body>
 </html>
