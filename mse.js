@@ -9,7 +9,7 @@ function MSELoadTrack(fragments, type, mediaSource, name) {
         return;
       }
       if (curFragment >= fragments.length) {
-        log(name + " addNextFragment() end of stream");
+        //log(name + " addNextFragment() end of stream");
         resolve();
         return;
       }
@@ -21,17 +21,17 @@ function MSELoadTrack(fragments, type, mediaSource, name) {
       req.responseType = "arraybuffer";
 
       req.addEventListener("load", function() {
-        log(name + " fetch of " + fragmentFile + " complete, appending");
+        //log(name + " fetch of " + fragmentFile + " complete, appending");
         sourceBuffer.appendBuffer(new Uint8Array(req.response));
       });
 
       req.addEventListener("error", function(){log(name + " error fetching " + fragmentFile); reject();});
       req.addEventListener("abort", function(){log(name + " aborted fetching " + fragmentFile);  reject();});
 
-      log(name + " addNextFragment() fetching next fragment " + fragmentFile);
+      //log(name + " addNextFragment() fetching next fragment " + fragmentFile);
       req.send(null);
     }
-    
+
     sourceBuffer = mediaSource.addSourceBuffer(type);
     sourceBuffer.addEventListener("updateend", addNextFragment);
     addNextFragment();

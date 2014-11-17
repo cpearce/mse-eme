@@ -1,4 +1,3 @@
-const KEYSYSTEM_TYPE = "org.w3.clearkey";
 
 function e(id) {
   return document.getElementById(id);
@@ -123,37 +122,83 @@ function KeysChange(event) {
       log("have key " + kid);
     }
   }, bail("Failed to get keyIds"));
-  
+
 }
 
-function SetupEME(video, name, keys, options)
+function polyfillRequestMediaKeySystemAccess(keySystem, options) {
+  if (!MediaKeys.isTypeSupported(keySystem)) {
+    log("!MediaKeys.IsTypeSupported()");
+    return new Promise(function(resolve, reject) {
+      log("Rejecting promise");
+      reject();
+    });
+  }
+  return new Promise(function(resolve, reject) {
+    // An object that implements MediaKeySystemAccess's interface.
+    resolve(
+      {
+        createMediaKeys : function() {
+          return MediaKeys.create(keySystem);
+        }
+      });
+    });
+}
+
+var ensurePromise;
+
+function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
+  // We may already have a MediaKeys object if we initialized EME for a
+  // different MSE SourceBuffer's "encrypted" event, or the initialization
+  // may still be in progress.
+  if (ensurePromise) {
+    return ensurePromise;
+  }
+
+  // If mozilla bug 1095257 hasn't landed, we need to use the older
+  // MediaKeys.isTypeSupported/create pattern. Polyfill to allow us to use
+  // the new spec behaviour.
+  var requestMediaKeySystemAccess =
+    navigator.requestMediaKeySystemAccess ? navigator.requestMediaKeySystemAccess
+                                          : polyfillRequestMediaKeySystemAccess;
+
+  options.initDataType = encryptedEvent.initDataType;
+
+  ensurePromise = requestMediaKeySystemAccess(keySystem, options)
+    .then(function(keySystemAccess) {
+      return keySystemAccess.createMediaKeys();
+    }, bail(name + " Failed to request key system access."))
+
+    .then(function(mediaKeys) {
+      log(name + " created MediaKeys object ok");
+      return video.setMediaKeys(mediaKeys);
+    }, bail(name + " failed to create MediaKeys object"))
+
+  return ensurePromise;
+}
+
+function SetupEME(video, keySystem, name, keys, options)
 {
+
+  if (MediaKeys.isTypeSupported) {
+    log("MediaKeys.isTypeSupported(" + keySystem + ")='" + MediaKeys.isTypeSupported(keySystem) + "'");
+  } else {
+    log("MediaKeys.isTypeSupported not defined");
+  }
+
   video.addEventListener("encrypted", function(ev) {
     log(name + " got encrypted event");
-    options.initDataType = ev.initDataType;
-    navigator.requestMediaKeySystemAccess(KEYSYSTEM_TYPE, options)
-      .then(function(keySystemAccess) {
-        return keySystemAccess.createMediaKeys();
-      }, bail(name + " Failed to request key system access."))
-      
-      .then(function(mediaKeys) {
-        log(name + " created MediaKeys object ok");
-        mediaKeys.sessions = [];
-        return video.setMediaKeys(mediaKeys);
-      }, bail(name + " failed to create MediaKeys object"))
-      
-      .then(function() {
-        log(name + " set MediaKeys on <video> element ok");
 
+    EnsureMediaKeysCreated(video, keySystem, options, ev)
+      .then(function() {
+        log(name + " ensured MediaKeys available on HTMLMediaElement");
         var session = video.mediaKeys.createSession();
         session.addEventListener("message", UpdateSessionFunc(name, keys));
         session.addEventListener("keyschange", KeysChange);
         return session.generateRequest(ev.initDataType, ev.initData);
-      }, bail(name + " failed to set MediaKeys on HTMLMediaElement"))
-      
+      }, bail(name + " failed to ensure MediaKeys on HTMLMediaElement"))
+
       .then(function() {
         log(name + " generated request");
-      }, bail(name + " Failed to request key system access2."));
+      }, bail(name + " Failed to generate request."));
   });
-  return v;
 }

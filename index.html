@@ -21,7 +21,9 @@
     <div id="log">
     </div>
     <script>
-    
+
+      const KEYSYSTEM_TYPE = "org.w3.clearkey";
+
       function Load() {
         var video = e("v");
 
@@ -34,6 +36,21 @@
             log("EVENT: " + e);
           }, false);
         });
+
+        var keys = {
+          // "keyid" : "key"
+          "7e571d037e571d037e571d037e571d03" : "7e5733337e5733337e5733337e573333",
+          "7e571d047e571d047e571d047e571d04" : "7e5744447e5744447e5744447e574444",
+        };
+
+        var options = [
+          {
+            initDataType: "cenc",
+            videoType: "video/mp4",
+          }
+        ];
+
+        SetupEME(video, KEYSYSTEM_TYPE, "video", keys, options);
 
         var ms = new MediaSource();
         video.src = URL.createObjectURL(ms);
@@ -52,25 +69,9 @@
             Promise.all(p).then(function(){log("All segments downloaded"); ms.endOfStream();});
           }
         }
-        
+
         ms.addEventListener("sourceopen", SourceOpen)
-          
-        var keys = {
-          // "keyid" : "key"
-          "7e571d037e571d037e571d037e571d03" : "7e5733337e5733337e5733337e573333",
-          "7e571d047e571d047e571d047e571d04" : "7e5744447e5744447e5744447e574444",
-        };
-          
-          
-        var options = [
-          {
-            keySystem: "org.w3.clearkey",
-            initDataType: "cenc",
-            videoType: "video/mp4",
-          }
-        ];      
-        
-        SetupEME(video, "video", keys, options);
+
       }
     </script>
   </body>
