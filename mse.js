@@ -1,4 +1,4 @@
-function MSELoadTrack(fragments, type, mediaSource, name) {
+function MSELoadTrack(fragments, type, mediaSource, name, progressCallback) {
   return new Promise(function(resolve, reject) {
     var sourceBuffer;
     var curFragment = 0;
@@ -11,6 +11,7 @@ function MSELoadTrack(fragments, type, mediaSource, name) {
       if (curFragment >= fragments.length) {
         //log(name + " addNextFragment() end of stream");
         resolve();
+        progressCallback(100);
         return;
       }
 
@@ -22,6 +23,7 @@ function MSELoadTrack(fragments, type, mediaSource, name) {
 
       req.addEventListener("load", function() {
         //log(name + " fetch of " + fragmentFile + " complete, appending");
+        progressCallback(Math.round(curFragment / fragments.length * 100));
         sourceBuffer.appendBuffer(new Uint8Array(req.response));
       });
 

@@ -22,6 +22,9 @@
 
     <h1>Media Source Extensions + ClearKey Encrypted Media Extension Demo</h1>
 
+    <div>Video downloaded: <span id="videoProgress">0</span>%</div>
+    <div>Audio downloaded: <span id="audioProgress">0</span>%</div>
+
     <video id="v" controls preload="auto">
     </video>
     <br>
@@ -63,11 +66,17 @@
         var ms = new MediaSource();
         video.src = URL.createObjectURL(ms);
 
+        function downloadProgress(id) {
+          return function(percent) {
+            e(id).innerHTML = percent;
+          }
+        }
+
         var SourceOpen = function () {
           ms.removeEventListener("sourceopen", SourceOpen);
           log(name + " sourceopen");
-          Promise.all([MSELoadTrack(videoFragments, "video/mp4", ms, "video"),
-                       MSELoadTrack(audioFragments, "audio/mp4", ms, "audio")])
+          Promise.all([MSELoadTrack(videoFragments, "video/mp4", ms, "video", downloadProgress("videoProgress")),
+                       MSELoadTrack(audioFragments, "audio/mp4", ms, "audio", downloadProgress("audioProgress"))])
             .then(function(){log("All segments downloaded"); ms.endOfStream();});
         }
 
