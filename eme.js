@@ -126,14 +126,11 @@ function KeysChange(event) {
 }
 
 function polyfillRequestMediaKeySystemAccess(keySystem, options) {
-  if (!MediaKeys.isTypeSupported(keySystem)) {
-    log("!MediaKeys.IsTypeSupported()");
-    return new Promise(function(resolve, reject) {
-      log("Rejecting promise");
-      reject();
-    });
-  }
   return new Promise(function(resolve, reject) {
+    if (!MediaKeys.isTypeSupported(keySystem)) {
+      log("!MediaKeys.IsTypeSupported(), rejecting...");
+      reject();
+    }
     // An object that implements MediaKeySystemAccess's interface.
     resolve(
       {
@@ -154,16 +151,17 @@ function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
     return ensurePromise;
   }
 
-  // If mozilla bug 1095257 hasn't landed, we need to use the older
-  // MediaKeys.isTypeSupported/create pattern. Polyfill to allow us to use
-  // the new spec behaviour.
-  var requestMediaKeySystemAccess =
-    navigator.requestMediaKeySystemAccess ? navigator.requestMediaKeySystemAccess
-                                          : polyfillRequestMediaKeySystemAccess;
-
+  var p;
   options.initDataType = encryptedEvent.initDataType;
+  if (navigator.requestMediaKeySystemAccess) {
+    p = navigator.requestMediaKeySystemAccess(keySystem, options);
+  } else {
+    // If mozilla bug 1095257 hasn't landed, we need to use the older
+    // MediaKeys.isTypeSupported/create pattern.
+    p = polyfillRequestMediaKeySystemAccess(keySystem, options);
+  }
 
-  ensurePromise = requestMediaKeySystemAccess(keySystem, options)
+  ensurePromise = p
     .then(function(keySystemAccess) {
       return keySystemAccess.createMediaKeys();
     }, bail(name + " Failed to request key system access."))
@@ -172,8 +170,6 @@ function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
       log(name + " created MediaKeys object ok");
       return video.setMediaKeys(mediaKeys);
     }, bail(name + " failed to create MediaKeys object"))
-
-  return ensurePromise;
 }
 
 function SetupEME(video, keySystem, name, keys, options)
@@ -182,7 +178,7 @@ function SetupEME(video, keySystem, name, keys, options)
   if (MediaKeys.isTypeSupported) {
     log("MediaKeys.isTypeSupported(" + keySystem + ")='" + MediaKeys.isTypeSupported(keySystem) + "'");
   } else {
-    log("MediaKeys.isTypeSupported not defined");
+    log("MediaKeys.isTypeSupported not defined, we'll use navigator.requestMediaKeySystemAccess");
   }
 
   video.addEventListener("encrypted", function(ev) {
