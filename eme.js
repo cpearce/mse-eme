@@ -73,10 +73,8 @@ function HexToBase64(hex)
 function UpdateSessionFunc(name, keys) {
   return function(ev) {
     var msgStr = ArrayBufferToString(ev.message);
-    var msg = JSON.parse(msgStr);
-
     log(name + " got message from CDM: " + msgStr);
-
+    var msg = JSON.parse(msgStr);
     var outKeys = [];
 
     for (var i = 0; i < msg.kids.length; i++) {
