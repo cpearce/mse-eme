@@ -171,7 +171,6 @@ function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
 
 function SetupEME(video, keySystem, name, keys, options)
 {
-
   if (MediaKeys.isTypeSupported) {
     log("MediaKeys.isTypeSupported(" + keySystem + ")='" + MediaKeys.isTypeSupported(keySystem) + "'");
   } else {
@@ -183,7 +182,7 @@ function SetupEME(video, keySystem, name, keys, options)
   video.addEventListener("encrypted", function(ev) {
     log(name + " got encrypted event");
 
-    EnsureMediaKeysCreated(video, keySystem, options, ev);
+    EnsureMediaKeysCreated(video, keySystem, options, ev)
     .then(function() {
         log(name + " ensured MediaKeys available on HTMLMediaElement");
         var session = video.mediaKeys.createSession();
