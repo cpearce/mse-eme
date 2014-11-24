@@ -165,6 +165,8 @@ function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
       log(name + " created MediaKeys object ok");
       return video.setMediaKeys(mediaKeys);
     }, bail(name + " failed to create MediaKeys object"))
+
+  return ensurePromise;
 }
 
 function SetupEME(video, keySystem, name, keys, options)
@@ -181,10 +183,11 @@ function SetupEME(video, keySystem, name, keys, options)
   video.addEventListener("encrypted", function(ev) {
     log(name + " got encrypted event");
 
-    EnsureMediaKeysCreated(video, keySystem, options, ev)
-      .then(function() {
+    EnsureMediaKeysCreated(video, keySystem, options, ev);
+    .then(function() {
         log(name + " ensured MediaKeys available on HTMLMediaElement");
         var session = video.mediaKeys.createSession();
+        video.sessions.push(session);
         session.addEventListener("message", UpdateSessionFunc(name, keys));
         session.addEventListener("keyschange", KeysChange);
         return session.generateRequest(ev.initDataType, ev.initData);
