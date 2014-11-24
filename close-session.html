@@ -1,0 +1,128 @@
+﻿<!--
+
+Copyright 2014, Mozilla Foundation and contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+<html>
+  <head>
+    <title>MSE + EME Demo</title>
+    <style>
+      #log {
+        font-size: small;
+      }
+      video {
+        max-width: 100%;
+      }
+      h1 {
+        font-family: arial;
+        font-size: large;
+      }
+      p.red {
+        font-family: arial;
+        background-color: red;
+      }
+    </style>
+    <script type="text/javascript" src="resources.js"></script>
+    <script type="text/javascript" src="eme.js"></script>
+    <script type="text/javascript" src="mse.js"></script>
+  </head>
+  <body>
+    <a href="https://github.com/cpearce/mse-eme"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
+
+    <h1>Media Source Extensions + ClearKey Encrypted Media Extension Demo</h1>
+
+    <p class="red">Note: E10S (multi-process Firefox) must be DISABLED for EME to work.</p>
+    <p>To disable E10S, click hamburger menu ("≡") on Firefox's toolbar, Options, and uncheck "Enable E10S (multi-process)", and restart Firefox.
+    </p>
+    <div>Video downloaded: <span id="videoProgress">0</span>%</div>
+    <div>Audio downloaded: <span id="audioProgress">0</span>%</div>
+
+    <video id="v" controls preload="auto">
+    </video>
+    <br>
+    <button id="loadButton" onclick="Load();">Load</button>
+    <br>
+    <button id="closeSessionsButton">Close Sessions</button>
+    <div id="log">
+    </div>
+    <script>
+
+      const KEYSYSTEM_TYPE = "org.w3.clearkey";
+
+      function Load() {
+        if (!navigator.requestMediaKeySystemAccess) {
+          log("EME API is not supported. Enable pref media.eme.enabled to true in about:config");
+          return;
+        }
+
+        var video = e("v");
+
+        // Log events dispatched to make debugging easier...
+        [ "canplay", "canplaythrough", "encrypted", "ended", "error", "loadeddata",
+          "loadedmetadata", "loadstart", "pause", "play", "playing", "progress",
+          "stalled", "suspend", "waiting",
+        ].forEach(function (e) {
+          v.addEventListener(e, function(event) {
+            log("EVENT: " + e);
+          }, false);
+        });
+
+        var keys = {
+          // "keyid" : "key"
+          "7e571d037e571d037e571d037e571d03" : "7e5733337e5733337e5733337e573333",
+          "7e571d047e571d047e571d047e571d04" : "7e5744447e5744447e5744447e574444",
+        };
+
+        var options = [
+          {
+            initDataType: "cenc",
+            videoType: "video/mp4",
+          }
+        ];
+
+        SetupEME(video, KEYSYSTEM_TYPE, "video", keys, options);
+
+        var ms = new MediaSource();
+        video.src = URL.createObjectURL(ms);
+
+        function downloadProgress(id) {
+          return function(percent) {
+            e(id).innerHTML = percent;
+          }
+        }
+
+        function closeSessions() {
+          for (var i = 0; i < video.sessions.length; i++) {
+            video.sessions[i].close();
+          }
+        }
+        
+        e('closeSessionsButton').addEventListener('click', closeSessions);
+        
+        var SourceOpen = function () {
+          ms.removeEventListener("sourceopen", SourceOpen);
+          log(name + " sourceopen");
+          Promise.all([MSELoadTrack(videoFragments, "video/mp4", ms, "video", downloadProgress("videoProgress")),
+                       MSELoadTrack(audioFragments, "audio/mp4", ms, "audio", downloadProgress("audioProgress"))])
+            .then(function(){log("All segments downloaded"); ms.endOfStream();});
+        }
+
+        ms.addEventListener("sourceopen", SourceOpen);
+        video.addEventListener("canplay", function(){video.play();});
+      }
+
+    </script>
+  </body>
+</html>
