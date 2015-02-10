@@ -109,13 +109,11 @@ function UpdateSessionFunc(name, keys) {
 
 function KeysChange(event) {
   var session = event.target;
-  session.getUsableKeyIds().then(function(keyIds) {
-    for (var k = 0; k < keyIds.length; k++) {
-      var kid = Base64ToHex(window.btoa(ArrayBufferToString(keyIds[k])));
-      log("have key " + kid);
-    }
-  }, bail("Failed to get keyIds"));
-
+  var map = session.keyStatuses;
+  for (var [key, val] of map.entries()) {
+    var kid = Base64ToHex(window.btoa(ArrayBufferToString(key)));
+    log("Session: " + session.sessionId + " keyId " + kid + " status " + val);
+  }
 }
 
 function polyfillRequestMediaKeySystemAccess(keySystem, options) {
