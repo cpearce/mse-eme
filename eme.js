@@ -186,7 +186,7 @@ function SetupEME(video, keySystem, name, keys, options)
         var session = video.mediaKeys.createSession();
         video.sessions.push(session);
         session.addEventListener("message", UpdateSessionFunc(name, keys));
-        session.addEventListener("keyschange", KeysChange);
+        session.addEventListener("keystatuseschange", KeysChange);
         return session.generateRequest(ev.initDataType, ev.initData);
       }, bail(name + " failed to ensure MediaKeys on HTMLMediaElement"))
 
