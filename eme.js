@@ -116,22 +116,6 @@ function KeysChange(event) {
   }
 }
 
-function polyfillRequestMediaKeySystemAccess(keySystem, options) {
-  return new Promise(function(resolve, reject) {
-    if (!MediaKeys.isTypeSupported(keySystem)) {
-      log("!MediaKeys.IsTypeSupported(), rejecting...");
-      reject();
-    }
-    // An object that implements MediaKeySystemAccess's interface.
-    resolve(
-      {
-        createMediaKeys : function() {
-          return MediaKeys.create(keySystem);
-        }
-      });
-    });
-}
-
 var ensurePromise;
 
 function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
@@ -142,17 +126,8 @@ function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
     return ensurePromise;
   }
 
-  var p;
   options.initDataType = encryptedEvent.initDataType;
-  if (navigator.requestMediaKeySystemAccess) {
-    p = navigator.requestMediaKeySystemAccess(keySystem, options);
-  } else {
-    // If mozilla bug 1095257 hasn't landed, we need to use the older
-    // MediaKeys.isTypeSupported/create pattern.
-    p = polyfillRequestMediaKeySystemAccess(keySystem, options);
-  }
-
-  ensurePromise = p
+  ensurePromise = navigator.requestMediaKeySystemAccess(keySystem, options)
     .then(function(keySystemAccess) {
       return keySystemAccess.createMediaKeys();
     }, bail(name + " Failed to request key system access."))
