@@ -51,6 +51,11 @@ limitations under the License.
 
       const KEYSYSTEM_TYPE = "org.w3.clearkey";
 
+      function IsFirefox43OrEarlier() {
+        return (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)) &&
+               (new Number(RegExp.$1)) <= 43;
+      }
+
       function Load() {
         if (!navigator.requestMediaKeySystemAccess) {
           log("EME API is not supported. Enable pref media.eme.enabled to true in about:config");
@@ -75,13 +80,29 @@ limitations under the License.
           "7e571d047e571d047e571d047e571d04" : "7e5744447e5744447e5744447e574444",
         };
 
-        var options = [
-          {
-            initDataType: "cenc",
-            videoType: 'video/mp4; codecs="avc1.64001F"', // High profile level 3.1
-            audioType: 'audio/mp4; codecs="mp4a.40.2"', // AAC-LC
-          }
-        ];
+        var options = [];
+
+        log('UA: "' + navigator.userAgent + '"');
+        if (IsFirefox43OrEarlier()) {
+          // Firefox 43 and earlier used a different style of defining configurations
+          // for navigator.requestMediaKeySystem that doesn't match the current spec.
+          log("Detected Firefox 43, using old style navigator.requestMediaKeySystem options.");
+          options = [
+            {
+              initDataType: "cenc",
+              videoType: 'video/mp4; codecs="avc1.64001F"', // High profile level 3.1
+              audioType: 'audio/mp4; codecs="mp4a.40.2"', // AAC-LC
+            }
+          ];
+        } else {
+          options = [
+            {
+              initDataTypes: ["cenc"],
+              videoCapabilities: [{contentType: 'video/mp4; codecs="avc1.64001F"'}], // High profile level 3.1
+              audioCapabilities: [{contentType: 'audio/mp4; codecs="mp4a.40.2"'}], // AAC-LC
+            }
+          ];
+        }
 
         SetupEME(video, KEYSYSTEM_TYPE, "video", keys, options);
 

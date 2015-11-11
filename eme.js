@@ -126,7 +126,8 @@ function EnsureMediaKeysCreated(video, keySystem, options, encryptedEvent) {
     return ensurePromise;
   }
 
-  options.initDataType = encryptedEvent.initDataType;
+  log("navigator.requestMediaKeySystemAccess("+ JSON.stringify(options) + ")");
+
   ensurePromise = navigator.requestMediaKeySystemAccess(keySystem, options)
     .then(function(keySystemAccess) {
       return keySystemAccess.createMediaKeys();
