@@ -81,6 +81,8 @@ limitations under the License.
         };
 
         var options = [];
+        const audioContentType = 'audio/mp4; codecs="mp4a.40.2"'; // AAC-LC
+        const videoContentType = 'video/mp4; codecs="avc1.64001F"'; // High profile level 3.1
 
         log('UA: "' + navigator.userAgent + '"');
         if (IsFirefox43OrEarlier()) {
@@ -90,16 +92,16 @@ limitations under the License.
           options = [
             {
               initDataType: "cenc",
-              videoType: 'video/mp4; codecs="avc1.64001F"', // High profile level 3.1
-              audioType: 'audio/mp4; codecs="mp4a.40.2"', // AAC-LC
+              videoType: videoContentType,
+              audioType: audioContentType,
             }
           ];
         } else {
           options = [
             {
               initDataTypes: ["cenc"],
-              videoCapabilities: [{contentType: 'video/mp4; codecs="avc1.64001F"'}], // High profile level 3.1
-              audioCapabilities: [{contentType: 'audio/mp4; codecs="mp4a.40.2"'}], // AAC-LC
+              videoCapabilities: [{contentType: videoContentType}],
+              audioCapabilities: [{contentType: audioContentType}],
             }
           ];
         }
