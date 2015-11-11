@@ -109,10 +109,13 @@ function UpdateSessionFunc(name, keys) {
 
 function KeysChange(event) {
   var session = event.target;
+  log("keystatuseschange event on session" + session.sessionId);
   var map = session.keyStatuses;
-  for (var [key, val] of map.entries()) {
-    var kid = Base64ToHex(window.btoa(ArrayBufferToString(key)));
-    log("Session: " + session.sessionId + " keyId " + kid + " status " + val);
+  for (var entry of map.entries()) {
+    var keyId = entry[0];
+    var status = entry[1];
+    var base64KeyId = Base64ToHex(window.btoa(ArrayBufferToString(keyId)));
+    log("SessionId=" + session.sessionId + " keyId=" + base64KeyId + " status=" + status);
   }
 }
 
