@@ -120,8 +120,8 @@ limitations under the License.
         var SourceOpen = function () {
           ms.removeEventListener("sourceopen", SourceOpen);
           log(name + " sourceopen");
-          Promise.all([MSELoadTrack(videoFragments, "video/mp4", ms, "video", downloadProgress("videoProgress")),
-                       MSELoadTrack(audioFragments, "audio/mp4", ms, "audio", downloadProgress("audioProgress"))])
+          Promise.all([MSELoadTrack(videoFragments, videoContentType, ms, "video", downloadProgress("videoProgress")),
+                       MSELoadTrack(audioFragments, audioContentType, ms, "audio", downloadProgress("audioProgress"))])
             .then(function(){log("All segments downloaded"); ms.endOfStream();});
         }
 
