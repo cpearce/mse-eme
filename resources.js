@@ -1,31 +1,8 @@
-/*
-var audioFragments = [
-  "media/sintel_trailer-720p-frag-cenc_audioinit.mp4",
-  "media/sintel_trailer-720p-frag-cenc_audio1.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio2.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio3.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio4.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio5.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio6.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio7.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio8.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio9.m4s",
-  "media/sintel_trailer-720p-frag-cenc_audio10.m4s",
-];
-
-var videoFragments = [
-  "media/sintel_trailer-720p-frag-cenc_videoinit.mp4",
-  "media/sintel_trailer-720p-frag-cenc_video1.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video2.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video3.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video4.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video5.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video6.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video7.m4s",
-  "media/sintel_trailer-720p-frag-cenc_video8.m4s",
-];
-*/
-
+// "keyid" : "key"
+var keys = {
+  "2fef8ad812df429783e9bf6e5e493e53":"7f412f0575f44f718259beef56ec7771",
+  "7eaa636ee7d142fd945d1f764877d8db":"624db3d757bb496fb93e51f341d11716",
+};
 
 var audioFragments = [
   "media/video-00-init.mp4",
@@ -69,4 +46,3 @@ var videoFragments = [
   "media/audio-25.mp4",
   "media/audio-26.mp4",
 ];
-
