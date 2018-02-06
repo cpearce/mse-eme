@@ -1,4 +1,2 @@
-Example JS page using Media Source Extensions to play fragmented MP4 file,
-and decrypting using Encyrpted Media Extensions API.
-
-Requries Firefox Nightly.
+Example using Media Source Extensions to play fragmented MP4 file,
+and decrypting using Encrypted Media Extensions API with ClearKey encryption.
